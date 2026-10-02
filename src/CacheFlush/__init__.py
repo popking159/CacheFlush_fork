@@ -1,24 +1,27 @@
+# -*- coding: utf-8 -*-
+from __future__ import print_function
 from Components.Language import language
 from Tools.Directories import resolveFilename, SCOPE_PLUGINS
+from os import environ as os_environ
 import gettext
-
-PluginLanguageDomain = "CacheFlush"
-PluginLanguagePath = "Extensions/CacheFlush/locale"
 
 
 def localeInit():
-	gettext.bindtextdomain(PluginLanguageDomain, resolveFilename(SCOPE_PLUGINS, PluginLanguagePath))
+    # getLanguage returns e.g. "fi_FI" for "language_country"
+    lang = language.getLanguage()[:2]
+    # Enigma doesn't set this (or LC_ALL, LC_MESSAGES, LANG). gettext needs it!
+    os_environ["LANGUAGE"] = lang
+    gettext.bindtextdomain("CacheFlush", resolveFilename(
+        SCOPE_PLUGINS, "Extensions/CacheFlush/locale"))
 
 
 def _(txt):
-	if gettext.dgettext(PluginLanguageDomain, txt):
-		return gettext.dgettext(PluginLanguageDomain, txt)
-	else:
-		print("[%s] fallback to default translation for %s" % (PluginLanguageDomain, txt))
-		return gettext.gettext(txt)
+    t = gettext.dgettext("CacheFlush", txt)
+    if t == txt:
+        print("[CacheFlush] fallback to default translation for", txt)
+        t = gettext.gettext(txt)
+    return t
 
 
 localeInit()
 language.addCallback(localeInit)
-
-__version__ = "1.17"
